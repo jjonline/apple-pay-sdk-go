@@ -8,9 +8,9 @@ import (
 // ApplePayPayment is the full response from the user's device after an Apple Pay request
 // https://developer.apple.com/documentation/apple_pay_on_the_web/applepaypayment
 type ApplePayPayment struct {
-	ShippingContact ApplePayPaymentContact `json:"shippingContact,omitempty"`
-	BillingContact  ApplePayPaymentContact `json:"billingContact,omitempty"`
-	Token           ApplePayPaymentToken   `json:"token"`
+	ShippingContact *ApplePayPaymentContact `json:"shippingContact,omitempty"`
+	BillingContact  *ApplePayPaymentContact `json:"billingContact,omitempty"`
+	Token           ApplePayPaymentToken    `json:"token"`
 }
 
 // ApplePayPaymentContact is the struct that contains billing/shipping information from an Apple Pay response
