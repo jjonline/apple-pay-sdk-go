@@ -16,12 +16,12 @@ import (
 )
 
 // DecryptResponse calls DecryptToken(r.Token)
-func (p *Processing) DecryptResponse(r *Response) (*Token, error) {
+func (p *Processing) DecryptResponse(r *ApplePayPayment) (*Token, error) {
 	return p.DecryptToken(&r.Token)
 }
 
 // DecryptToken decrypts an Apple Pay token
-func (p *Processing) DecryptToken(t *PKPaymentToken) (*Token, error) {
+func (p *Processing) DecryptToken(t *ApplePayPaymentToken) (*Token, error) {
 	if p.processingCertificate == nil {
 		return nil, errors.New("nil processing certificate")
 	}
@@ -62,7 +62,7 @@ func (p *Processing) DecryptToken(t *PKPaymentToken) (*Token, error) {
 // computeEncryptionKey uses the token's ephemeral EC key, the processing
 // private key, and the merchant ID to compute the encryption key
 // It is only used for the EC_v1 format
-func (p *Processing) computeEncryptionKey(t *PKPaymentToken) ([]byte, error) {
+func (p *Processing) computeEncryptionKey(t *ApplePayPaymentToken) ([]byte, error) {
 	// Load the required keys
 	pub, err := t.ephemeralPublicKey()
 	if err != nil {
@@ -89,8 +89,8 @@ func (p *Processing) identifierHash() []byte {
 	return h.Sum(nil)
 }
 
-// ephemeralPublicKey parsed the ephemeral public key in a PKPaymentToken
-func (t *PKPaymentToken) ephemeralPublicKey() (*ecdsa.PublicKey, error) {
+// ephemeralPublicKey parsed the ephemeral public key in a ApplePayPaymentToken
+func (t *ApplePayPaymentToken) ephemeralPublicKey() (*ecdsa.PublicKey, error) {
 	// Parse the ephemeral public key
 	pubI, err := x509.ParsePKIXPublicKey(
 		t.PaymentData.Header.EphemeralPublicKey,
@@ -140,7 +140,7 @@ func deriveEncryptionKey(sharedSecret *big.Int, merchantIDHash []byte) []byte {
 // unwrapEncryptionKey uses the merchant's RSA processing key to decrypt the
 // encryption key stored in the token
 // It is only used for the RSA_v1 format
-func (p *Processing) unwrapEncryptionKey(t *PKPaymentToken) ([]byte, error) {
+func (p *Processing) unwrapEncryptionKey(t *ApplePayPaymentToken) ([]byte, error) {
 	priv, ok := p.processingCertificate.PrivateKey.(*rsa.PrivateKey)
 	if !ok {
 		return nil, errors.New("processing key is not RSA")
@@ -163,7 +163,7 @@ func (p *Processing) unwrapEncryptionKey(t *PKPaymentToken) ([]byte, error) {
 // AES
 
 // decrypt does the symmetric decryption of the payment token using AES-256-GCM
-func (t *PKPaymentToken) decrypt(key []byte) ([]byte, error) {
+func (t *ApplePayPaymentToken) decrypt(key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, fmt.Errorf("error creating the block cipher: %w", err)

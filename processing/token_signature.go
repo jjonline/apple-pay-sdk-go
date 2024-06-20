@@ -22,7 +22,7 @@ var (
 // verifySignature checks the signature of the token, partially using OpenSSL
 // due to Go's lack of support for PKCS7.
 // See https://developer.apple.com/library/content/documentation/PassKit/Reference/PaymentTokenJSON/PaymentTokenJSON.html#//apple_ref/doc/uid/TP40014929-CH8-SW2
-func (t *PKPaymentToken) verifySignature() error {
+func (t *ApplePayPaymentToken) verifySignature() error {
 
 	// verify the version EC_v1 or RSA_v1
 	if !slices.Contains([]string{vEcV1, vRsaV1}, t.PaymentData.Version) {
@@ -115,7 +115,7 @@ func verifyCertificates(root, inter, leaf *x509.Certificate) error {
 	return nil
 }
 
-func (t *PKPaymentToken) verifyPKCS7Signature(p7 *pkcs7.PKCS7) error {
+func (t *ApplePayPaymentToken) verifyPKCS7Signature(p7 *pkcs7.PKCS7) error {
 	// we assigned the signed data to the p7 content because it could be detached in the previous steps
 	p7.Content = t.signedData()
 	return p7.Verify()
@@ -123,7 +123,7 @@ func (t *PKPaymentToken) verifyPKCS7Signature(p7 *pkcs7.PKCS7) error {
 
 // signedData returns the data signed by the client's Secure Element as defined
 // in Apple's documentation: https://developer.apple.com/library/content/documentation/PassKit/Reference/PaymentTokenJSON/PaymentTokenJSON.html#//apple_ref/doc/uid/TP40014929-CH8-SW2
-func (t *PKPaymentToken) signedData() []byte {
+func (t *ApplePayPaymentToken) signedData() []byte {
 	signed := bytes.NewBuffer(nil)
 
 	switch t.PaymentData.Version {
@@ -144,7 +144,7 @@ func (t *PKPaymentToken) signedData() []byte {
 // verifySigningTime checks that the time of signing of the token is before the
 // transaction was received, and that the gap between the two is not too
 // significant. It uses the variable TransactionTimeWindow as a limit.
-func (t *PKPaymentToken) verifySigningTime(p7 *pkcs7.PKCS7) error {
+func (t *ApplePayPaymentToken) verifySigningTime(p7 *pkcs7.PKCS7) error {
 	transactionTime := time.Now()
 	if !t.transactionTime.IsZero() {
 		transactionTime = t.transactionTime

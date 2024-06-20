@@ -6,7 +6,7 @@ import (
 )
 
 func New(merchantId string, processingKeyPem, processingCertPem []byte) (*Processing, error) {
-	cert, err := tls.X509KeyPair(processingKeyPem, processingCertPem)
+	cert, err := tls.X509KeyPair(processingCertPem, processingKeyPem)
 	if err != nil {
 		return nil, fmt.Errorf("error loading the certificate: %w", err)
 	}
