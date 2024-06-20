@@ -15,13 +15,13 @@ import (
 	"errors"
 )
 
-// DecryptResponse calls DecryptToken(r.Token)
-func (p *Processing) DecryptResponse(r *ApplePayPayment) (*Token, error) {
-	return p.DecryptToken(&r.Token)
+// DecryptApplePayPayment calls DecryptApplePayPaymentToken(r.Token)
+func (p *Processing) DecryptApplePayPayment(r *ApplePayPayment) (*Token, error) {
+	return p.DecryptApplePayPaymentToken(&r.Token)
 }
 
-// DecryptToken decrypts an Apple Pay token
-func (p *Processing) DecryptToken(t *ApplePayPaymentToken) (*Token, error) {
+// DecryptApplePayPaymentToken decrypts an Apple Pay token
+func (p *Processing) DecryptApplePayPaymentToken(t *ApplePayPaymentToken) (*Token, error) {
 	if p.processingCertificate == nil {
 		return nil, errors.New("nil processing certificate")
 	}
