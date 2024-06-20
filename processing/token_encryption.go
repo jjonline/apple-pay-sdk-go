@@ -26,7 +26,7 @@ func (p *Processing) DecryptToken(t *ApplePayPaymentToken) (*Token, error) {
 		return nil, errors.New("nil processing certificate")
 	}
 	// Verify the signature before anything
-	if err := t.verifySignature(); err != nil {
+	if err := t.verifySignature(p.rootCaCertificatePem); err != nil {
 		return nil, fmt.Errorf("invalid token signature: %w", err)
 	}
 

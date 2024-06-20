@@ -7,7 +7,6 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"os"
 	"slices"
 	"time"
 
@@ -19,11 +18,11 @@ var (
 	interCertificateOID = mustParseASN1ObjectIdentifier("1.2.840.113635.100.6.2.14")
 )
 
-// verifySignature checks the signature of the token, partially using OpenSSL
-// due to Go's lack of support for PKCS7.
+// verifySignature checks the signature of the token
+//   - rootCaPem Apple Root CA pem format stream
+//
 // See https://developer.apple.com/library/content/documentation/PassKit/Reference/PaymentTokenJSON/PaymentTokenJSON.html#//apple_ref/doc/uid/TP40014929-CH8-SW2
-func (t *ApplePayPaymentToken) verifySignature() error {
-
+func (t *ApplePayPaymentToken) verifySignature(rootCaPem []byte) error {
 	// verify the version EC_v1 or RSA_v1
 	if !slices.Contains([]string{vEcV1, vRsaV1}, t.PaymentData.Version) {
 		return errors.New("invalid version")
@@ -36,7 +35,7 @@ func (t *ApplePayPaymentToken) verifySignature() error {
 	}
 
 	// load Apple Root CA - G3 root certificate
-	root, err := loadRootCertificate(AppleRootCertificatePath)
+	root, err := loadRootCertificate(rootCaPem)
 	if err != nil {
 		return fmt.Errorf("error loading the root certificate: %w", err)
 	}
@@ -69,11 +68,8 @@ func (t *ApplePayPaymentToken) verifySignature() error {
 }
 
 // loadRootCertificate loads the root certificate from the disk
-func loadRootCertificate(path string) (*x509.Certificate, error) {
-	rootPEMBytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("error reading the root certificate: %w", err)
-	}
+//   - rootPEMBytes root CA certificate pem format byte stream
+func loadRootCertificate(rootPEMBytes []byte) (*x509.Certificate, error) {
 	rootPEM, rest := pem.Decode(rootPEMBytes)
 	if rootPEM == nil {
 		return nil, errors.New("error decoding the root certificate")

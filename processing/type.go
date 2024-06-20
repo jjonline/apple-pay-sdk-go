@@ -108,4 +108,5 @@ type Token struct {
 type Processing struct {
 	identifier            string
 	processingCertificate *tls.Certificate
+	rootCaCertificatePem  []byte // Root CA pem format stream
 }
